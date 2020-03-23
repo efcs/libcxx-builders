@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+  actions-runner:
+    build:
+      context: ../../
+      dockerfile: images/github-actions-runner/Dockerfile
+    volumes:
+    - /github-runner-work:/github-runner-work
+    - /var/run/docker.sock:/var/run/docker.sock
+    - type: bind
+      source: ./config/
+      target: /config
+      read_only: true
+    secrets:
+    - github-token
+    image: ericwf/github-runner
+    command: |
+            /register-builder.sh --token-file /run/secrets/github-token --config /config/worker-config.json --run
+
+secrets:
+  github-token:
+    file: secrets/github-token.txt

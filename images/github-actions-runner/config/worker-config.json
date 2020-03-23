@@ -1,0 +1,9 @@
+{
+  "name": "libcxx-worker",
+  "work": "/github-runner-work/libcxx-worker",
+  "install": "/home/actions-runner/",
+  "owner": "efcs",
+  "repo": "libcxx-builders",
+  "labels": ["libcxx-builder"],
+  "download_url": "https://storage.googleapis.com/libcxx-public/packages/actions-runner-linux-x64-custom.tar.gz"
+}

@@ -1,0 +1,101 @@
+name: libcxx test
+
+on:
+  push:
+    paths:
+    - /repo_payload.json
+
+jobs:
+  default:
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+    - uses: efcs/checkout@v2
+    - name: 'Configure and Build'
+      uses: ./actions/configure-and-build-runtimes
+    - name: 'Test libc++abi'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxxabi/test/
+    - name: 'Test C++2a'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test/
+        enable_modules: true
+        lit_args: '--param=std=c++2a'
+    - name: 'Test C++03'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test
+        lit_args: '--param=std=c++03'
+    - name: 'Test C++11'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test/
+        enable_modules: true
+        lit_args: '--param=std=c++11'
+    - name: 'Test C++14'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test/
+        enable_modules: true
+        lit_args: '--param=std=c++14'
+    - name: 'Test C++17'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test/
+        enable_modules: true
+        lit_args: '--param=std=c++17'
+  asan:
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+    - uses: efcs/checkout@v2
+    - name: 'Configure and Build'
+      uses: ./actions/configure-and-build-runtimes
+      with:
+        sanitizer: 'Address'
+    - name: 'Test libc++abi'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxxabi/test
+    - name: 'Test libc++'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test
+        enable_modules: true
+  msan:
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+    - uses: efcs/checkout@v2
+    - name: 'Configure and Build'
+      uses: ./actions/configure-and-build-runtimes
+      with:
+        sanitizer: 'MemoryWithOrigins'
+    - name: 'Test libc++abi'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxxabi/test
+    - name: 'Test libc++'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test
+        enable_modules: true
+  ubsan:
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+    - uses: efcs/checkout@v2
+    - name: 'Configure and Build'
+      uses: ./actions/configure-and-build-runtimes
+      with:
+        sanitizer: 'Undefined'
+    - name: 'Test libc++abi'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxxabi/test
+    - name: 'Test libc++'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test
+        enable_modules: true
+
+
+

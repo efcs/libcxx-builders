@@ -1,0 +1,68 @@
+name: External trigger
+
+on:
+  repository_dispatch:
+    types: precommit_test_request
+
+jobs:
+  checkout_and_build:
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.client_payload.repository }}
+          ref: ${{ github.event.client_payload.ref }}
+          clean: false
+      - name: "Get Arc stuff"
+        run: |
+          arc --conduit-uri $ARC_URI --conduit-token $ARC_TOKEN export --git --revision $ARC_PATCH -- > /tmp/patches.in
+          git apply /tmp/patches.in
+        env:
+          ARC_PATCH: ${{ github.event.client_payload.patch }}
+          ARC_URI: ${{ secrets.arc_url }}
+          ARC_TOKEN: ${{ secrets.arc_token }}
+      - uses: actions/checkout@v2
+        with:
+          path: 'libcxx-builders'
+      - name: 'Configure and Build'
+        uses: ./libcxx-builders/actions/configure-and-build-runtimes
+      - name: 'Test libc++abi'
+        uses: ./libcxx-builders/actions/test-libcxx
+        with:
+          test_suite: libcxxabi/test/
+      - name: 'Test C++2a'
+        uses: ./libcxx-builders/actions/test-libcxx
+        with:
+          test_suite: libcxx/test/
+          enable_modules: true
+          lit_args: '--param=std=c++2a'
+      - name: 'Test C++03'
+        uses: ./libcxx-builders/actions/test-libcxx
+        with:
+          test_suite: libcxx/test
+          lit_args: '--param=std=c++03'
+      - name: 'Test C++11'
+        uses: ./libcxx-builders/actions/test-libcxx
+        with:
+          test_suite: libcxx/test/
+          lit_args: '--param=std=c++11'
+      - name: 'Test C++14'
+        uses: ./libcxx-builders/actions/test-libcxx
+        with:
+          test_suite: libcxx/test/
+          enable_modules: true
+          lit_args: '--param=std=c++14'
+      - name: 'Test C++17'
+        uses: ./libcxx-builders/actions/test-libcxx
+        with:
+          test_suite: libcxx/test/
+          enable_modules: true
+          lit_args: '--param=std=c++17'
