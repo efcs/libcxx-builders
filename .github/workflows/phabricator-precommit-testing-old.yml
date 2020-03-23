@@ -1,8 +1,8 @@
-name: External trigger
+name: External trigger Old
 
 on:
   repository_dispatch:
-    types: precommit_test_request
+    types: precommit_test_request_old
 
 jobs:
   checkout_and_build:
@@ -20,6 +20,15 @@ jobs:
         with:
           repository: ${{ github.event.client_payload.repository }}
           ref: ${{ github.event.client_payload.ref }}
+          clean: false
+      - name: "Get Arc stuff"
+        run: |
+          arc --conduit-uri $ARC_URI --conduit-token $ARC_TOKEN export --git --revision $ARC_PATCH -- > /tmp/patches.in
+          git apply /tmp/patches.in
+        env:
+          ARC_PATCH: ${{ github.event.client_payload.patch }}
+          ARC_URI: ${{ secrets.arc_url }}
+          ARC_TOKEN: ${{ secrets.arc_token }}
       - uses: actions/checkout@v2
         with:
           path: 'libcxx-builders'
