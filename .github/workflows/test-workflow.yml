@@ -1,0 +1,69 @@
+name: Test Workflow
+
+on:
+  repository_dispatch:
+    types: test_precommit_test_request
+
+jobs:
+  checkout_and_build:
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - uses: actions/checkout@v2
+        with:
+          repository: ${{ github.event.client_payload.repository }}
+          ref: ${{ github.event.client_payload.ref }}
+          clean: false
+      - name: "Get Arc stuff"
+        run: |
+          arc --conduit-uri $ARC_URI --conduit-token $ARC_TOKEN export --git --revision $ARC_PATCH -- > /tmp/patches.in
+          git apply /tmp/patches.in
+          rm -rf .git/
+        env:
+          ARC_PATCH: ${{ github.event.client_payload.patch }}
+          ARC_URI: ${{ secrets.arc_url }}
+          ARC_TOKEN: ${{ secrets.arc_token }}
+      - uses: actions/checkout@v2
+        with:
+          path: 'libcxx-builders'
+      - name: 'Configure and Build'
+        uses: ./libcxx-builders/actions/configure-and-build-runtimes
+      - name: Cleanup
+        run: |
+            rm -rf .git/ libcxx-builders/.git
+      - name: 'Upload Artifacts'
+        uses: actions/upload-artifact@v1
+        with:
+          name: source_and_build
+          path: .
+  test_cxx2a:
+    needs: [checkout_and_build]
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+      - uses: actions/download-artifact@v1
+        with:
+          name: source_and_build
+      - uses: ./libcxx-builders/actions/test-libcxx
+        with:
+          test_suite: libcxx/test/
+          enable_modules: true
+          lit_args: '--param=std=c++2a'
+  test_cxx03:
+    needs: [checkout_and_build]
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+    - uses: actions/download-artifact@v1
+      with:
+        name: source_and_build
+    - uses: ./libcxx-builders/actions/test-libcxx
+      with:
+        test_suite: libcxx/test/
+        enable_modules: false
+        lit_args: '--param=std=c++03'
