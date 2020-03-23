@@ -1,8 +1,0 @@
-{
-  "event_type": "test_precommit_test_request",
-  "client_payload": {
-    "repository": "llvm/llvm-project",
-    "ref": "master",
-    "patch": "D76104"
-  }
-}
