@@ -66,7 +66,7 @@ var lit_path = path.join(build_path, 'bin', 'llvm-lit');
 var test_suite_path = path.join(source_path, process.env.INPUT_TEST_SUITE);
 
 var lit_args = '-sv --shuffle ';
-lit_args += ' --show-unsupported  --show-xfail --xunit-xml-output /tmp/output.xml ';
+lit_args += ' --show-unsupported  --show-xfail --no-progress-bar --xunit-xml-output test-suite-results.xml ';
 lit_args += ''.concat(' ', '--param=enable_modules=', process.env.INPUT_ENABLE_MODULES);
 if (process.env.INPUT_LIT_ARGS) {
   lit_args += ' ';
