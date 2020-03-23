@@ -1,6 +1,6 @@
 {
   "name": "libcxx-worker",
-  "work": "/github-runner-work/libcxx-worker",
+  "work": "/var/run/user/github-runner-work/libcxx-worker",
   "install": "/home/actions-runner/",
   "owner": "efcs",
   "repo": "libcxx-builders",

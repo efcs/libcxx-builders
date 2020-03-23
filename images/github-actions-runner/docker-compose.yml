@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: images/github-actions-runner/Dockerfile
     volumes:
-    - /github-runner-work:/github-runner-work
+    - /var/run/user/github-runner-work:/var/run/user/github-runner-work
     - /var/run/docker.sock:/var/run/docker.sock
     - type: bind
       source: ./config/

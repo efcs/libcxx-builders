@@ -91,7 +91,7 @@ WORKDIR /home/actions-runner/
 RUN mkdir /home/actions-runner/arc-install/
 
 
-ADD ./utils/ /github-utils/
+ADD utils/ /github-utils/
 RUN sudo chown -R actions-runner /github-utils/
 ADD images/github-actions-runner/register-builder.sh /register-builder.sh
 ADD images/github-actions-runner/entrypoint.sh /entrypoint.sh
