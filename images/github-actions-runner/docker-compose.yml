@@ -14,7 +14,9 @@ services:
       read_only: true
     secrets:
     - github-token
-    image: ericwf/github-runner
+    image: github-runner
+    logging:
+      driver: gcplogs
     command: |
             /register-builder.sh --token-file /run/secrets/github-token --config /config/worker-config.json --run
 
