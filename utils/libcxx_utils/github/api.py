@@ -121,6 +121,8 @@ class GithubActionsAPI(object):
     payload = json.loads(payload)
     return self._post('repos/:owner/:repo/dispatches', replacements={}, json=payload)
 
+  def listBranches(self):
+    return self._get('repos/:owner/:repo/branches')
 
 
 if __name__ == '__main__':

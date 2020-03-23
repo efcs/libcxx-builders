@@ -71,7 +71,14 @@ class GithubActionsUtil(object):
     parser_repo_event.add_argument('payload')
     parser_repo_event.set_defaults(func=self._push_event_cmd)
 
+    parser_list_branches = subparsers.add_parser('list-branches')
+    parser_list_branches.set_defaults(func=self._list_branches_cmd)
+
     return parser
+
+  def _list_branches_cmd(self, args):
+    res = self._api_call(self.api.listBranches)
+    self._print_result(res.json())
 
   def _push_event_cmd(self, args):
     payload = args.payload
