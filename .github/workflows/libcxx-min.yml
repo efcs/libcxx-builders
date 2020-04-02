@@ -1,0 +1,23 @@
+name: libcxx test
+
+on:
+  push:
+    paths:
+    - /TRIGGER.txt
+
+jobs:
+  cxx2a:
+    runs-on: [self-hosted, libcxx-builder]
+    steps:
+    - uses: efcs/checkout@v2
+    - name: 'Configure and Build'
+      uses: ./actions/configure-and-build-runtimes
+    - name: 'Test C++2a'
+      uses: ./actions/test-libcxx
+      with:
+        test_suite: libcxx/test/
+        enable_modules: true
+        lit_args: '--param=std=c++2a'
+
+
+

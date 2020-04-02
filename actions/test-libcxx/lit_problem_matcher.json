@@ -1,0 +1,23 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "lit-test-output",
+      "pattern": [
+        {
+          // Matches the 1st line in the output
+          "regexp": "^[*]{20} TEST '(.*) :: ([^']*)' (\\w*) [*]{20}",
+          "file": 2
+          "code": 3,
+          "fromPath": 1
+        },
+        {
+          // Matches the 2nd and 3rd line in the output
+          "regexp": "^(?!\\*{20}).*$",
+          "message": 1,
+          // File is carried through from above, so we define the rest of the groups
+          "loop": true
+        }
+      ]
+    }
+  ]
+}
