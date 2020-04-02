@@ -6,7 +6,7 @@ services:
       context: ../../
       dockerfile: images/github-actions-runner/Dockerfile
     volumes:
-    - /var/run/user/github-runner-work:/var/run/user/github-runner-work
+    - /home/actions-runner/_work:/home/actions-runner/_work
     - /var/run/docker.sock:/var/run/docker.sock
     - type: bind
       source: ./config/
@@ -14,9 +14,9 @@ services:
       read_only: true
     secrets:
     - github-token
-    image: github-runner
     logging:
       driver: gcplogs
+    image: github-runner
     command: |
             /register-builder.sh --token-file /run/secrets/github-token --config /config/worker-config.json --run
 
