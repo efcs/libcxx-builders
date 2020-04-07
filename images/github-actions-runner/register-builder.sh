@@ -27,11 +27,11 @@ while [[ $# -gt 0 ]]; do
       ;;
     --run)
       shift
-      SHOULD_RUN=true
+      SHOULD_RUN="true"
       ;;
     --once)
       shift
-      RUN_ONCE=true
+      RUN_ONCE="true"
       ;;
     -h|--help)
       show_usage
@@ -88,6 +88,7 @@ wget -q -O - "$PACKAGE_URL" | tar xzf -
 if [ "$SHOULD_RUN" != "true" ]; then
   exit 0
 fi
+
 if [ "$RUN_ONCE" != "true" ]; then
   ./run.sh
   exit $?
@@ -95,6 +96,6 @@ fi
 
 while true; do
   ./run.sh --once
-  rm -rf "${WORKER_DIR}/actions/*'
+  rm -rf "${WORKER_DIR}/actions/*"
 fi
 
