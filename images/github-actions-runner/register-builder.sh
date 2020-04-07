@@ -88,7 +88,7 @@ wget -q -O - "$PACKAGE_URL" | tar xzf -
 if [ "$SHOULD_RUN" != "true" ]; then
   exit 0
 fi
-if [ "$RUN_ONCE" != "true"]; then
+if [ "$RUN_ONCE" != "true" ]; then
   ./run.sh
   exit $?
 fi
