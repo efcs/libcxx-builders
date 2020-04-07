@@ -97,5 +97,5 @@ fi
 while true; do
   ./run.sh --once
   rm -rf "${WORKER_DIR}/actions/*"
-fi
+done
 
