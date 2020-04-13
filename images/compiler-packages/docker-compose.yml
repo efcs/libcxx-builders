@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  compiler-packages:
+    build:
+      context: .
+    image: compiler-packages
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - ./packages:/packages
+    entrypoint: /bundle-packages.sh
+
