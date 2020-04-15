@@ -18,7 +18,7 @@ services:
       driver: gcplogs
     image: github-runner
     command: |
-            /register-builder.sh --token-file /run/secrets/github-token --config /config/worker-config.json --run
+            /register-builder.sh --token-file /run/secrets/github-token --config /config/worker-config.json --run --once
 
 secrets:
   github-token:

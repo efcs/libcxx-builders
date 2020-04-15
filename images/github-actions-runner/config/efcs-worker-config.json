@@ -5,5 +5,5 @@
   "owner": "libcxx",
   "repo": "actions",
   "labels": ["libcxx-builder"],
-  "download_url": "https://storage.googleapis.com/libcxx-public/packages/actions-runner-linux-x64-custom.tar.gz"
+  "download_url": "https://storage.googleapis.com/libcxx-public/packages/actions-runner-linux-x64-2.169.0.tar.gz"
 }

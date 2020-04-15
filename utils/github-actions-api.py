@@ -48,6 +48,10 @@ class GithubActionsUtil(object):
     parser_registration_token = subparsers.add_parser('registration-token')
     parser_registration_token.set_defaults(func=self._registration_token_cmd)
 
+    parser_org_registration_token = subparsers.add_parser('org-registration-token')
+    parser_org_registration_token.set_defaults(func=self._org_registration_token_cmd)
+
+
     parser_workflows = subparsers.add_parser('workflows')
     parser_workflows.set_defaults(func=self._workflows_cmd)
 
@@ -106,6 +110,10 @@ class GithubActionsUtil(object):
 
   def _registration_token_cmd(self, args):
     res = self._api_call(self.api.getCreationToken)
+    self._print_result(res.json())
+
+  def _org_registration_token_cmd(self, args):
+    res = self._api_call(self.api.getCreationTokenForOrg)
     self._print_result(res.json())
 
   def _workflows_cmd(self, args):

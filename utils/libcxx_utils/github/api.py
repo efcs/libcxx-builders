@@ -61,7 +61,7 @@ class GithubActionsAPI(object):
     self.base_url = 'https://api.github.com/'
     self.session = requests.Session()
     self.session.headers['Authorization'] = 'token %s' % auth.token
-    self.session.headers['Accept'] = 'application/vnd.github.everest-preview+json'
+    self.session.headers['Accept'] = 'application/vnd.github.v3+json'
     self.substitutions = dict()
     self.substitutions[':owner'] = auth.owner
     self.substitutions[':repo'] = auth.repo
@@ -98,6 +98,9 @@ class GithubActionsAPI(object):
 
   def getCreationToken(self):
     return self._post('repos/:owner/:repo/actions/runners/registration-token')
+
+  def getCreationTokenForOrg(self):
+    return self._post('actions/runner-registration', replacements={}, json=json.loads('{ "url": "https://github.com/libcxx/actions" }'))
 
   def getRemovalToken(self):
     return self._post('repos/:owner/:repo/actions/runners/remove-token')
