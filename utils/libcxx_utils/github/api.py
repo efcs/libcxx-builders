@@ -4,8 +4,16 @@ import os
 import sys
 import json
 from argparse import ArgumentParser
+import subprocess
+from libcxx_utils import util
 
-def get_default_auth_scope():
+def get_default_auth():
+  auth_env = AuthFromEnv()
+  if auth_env:
+    return auth_env
+  return AuthFromFile()
+
+def get_default_auth_file():
   auth_file = os.environ.get('GITHUB_AUTH_FILE', None)
   if auth_file is not None:
     return auth_file
@@ -15,18 +23,50 @@ def get_default_auth_scope():
   return None
 
 
+class AuthFromEnv(object):
+  @staticmethod
+  def _getToken():
+    tk = os.environ['GITHUB_TOKEN']
+    if tk is not None:
+      return tk
+    tk_name = os.environ['GITHUB_TOKEN_NAME']
+    if tk_name is not None:
+      return util.capture(['lpass', 'show', '--notes', tk_name]).strip()
+    return None
+
+  @staticmethod
+  def _getRepo():
+    return os.environ['GITHUB_REPO']
+
+  @staticmethod
+  def _getOwner():
+    return os.environ['GITHUB_OWNER']
+
+  def __bool__(self):
+    return self.repo is not None and self.owner is not None and self.token is not None
+
+  def __init__(self):
+    self.repo = self._getRepo()
+    self.owner = self._getOwner()
+    self.token = self._getToken()
+
+
 class AuthFromFile(object):
   def __init__(self, auth_file=None):
     if auth_file is None:
-      auth_file = get_default_auth_scope()
+      auth_file = get_default_auth_file()
     if auth_file is None or not os.path.exists(auth_file):
       print("Invalid auth file: %s" % auth_file)
       sys.exit(1)
     with open(auth_file, 'r') as f:
       cfg = json.load(f)
     self.repo = cfg['repo']
-    self.token = cfg['token']
+    self.token_name = cfg['token_name']
+    self.token = self._readToken(cfg['token_name'])
     self.owner = cfg['owner']
+
+  def _readToken(self, token_name):
+    return util.capture(['lpass', 'show', '--notes', token_name]).strip()
 
 
 class ManualAuth(object):
@@ -57,11 +97,11 @@ def tryCommandLineAuth(argv=sys.argv):
 
 
 class GithubActionsAPI(object):
-  def __init__(self, auth=AuthFromFile()):
+  def __init__(self, auth):
     self.base_url = 'https://api.github.com/'
     self.session = requests.Session()
     self.session.headers['Authorization'] = 'token %s' % auth.token
-    self.session.headers['Accept'] = 'application/vnd.github.v3+json'
+    self.session.headers['Accept'] = 'application/vnd.github.everest-preview+json'
     self.substitutions = dict()
     self.substitutions[':owner'] = auth.owner
     self.substitutions[':repo'] = auth.repo
@@ -90,6 +130,9 @@ class GithubActionsAPI(object):
   def getActionsDownloads(self):
     return self._get('repos/:owner/:repo/actions/runners/downloads')
 
+  def getOrgActionsDownloads(self):
+    return self._get('orgs/:owner/actions/runners/downloads')
+
   def getRunners(self):
     return self._get('repos/:owner/:repo/actions/runners')
 
@@ -97,10 +140,10 @@ class GithubActionsAPI(object):
     return self._get('repos/:owner/:repo/actions/runners/:runner_id', runner_id=runner_id)
 
   def getCreationToken(self):
-    return self._post('repos/:owner/:repo/actions/runners/registration-token')
+    return self._post('repos/:owner/actions/runners/registration-token')
 
   def getCreationTokenForOrg(self):
-    return self._post('actions/runner-registration', replacements={}, json=json.loads('{ "url": "https://github.com/libcxx/actions" }'))
+    return self._post('orgs/:owner/actions/runners/registration-token')
 
   def getRemovalToken(self):
     return self._post('repos/:owner/:repo/actions/runners/remove-token')
@@ -126,6 +169,12 @@ class GithubActionsAPI(object):
 
   def listBranches(self):
     return self._get('repos/:owner/:repo/branches')
+
+  def listCredentials(self):
+    return self._get('orgs/:owner/credential-authorizations')
+
+  def getOrg(self):
+    return self._get('orgs/:owner')
 
 
 if __name__ == '__main__':

@@ -30,9 +30,9 @@ class GithubAuthUtil(object):
     parser_create.add_argument('--owner',
                                   help='the repository owner',
                                   required=True)
-    parser_create.add_argument('--token', required=True,
-                              dest='token',
-                              help='the auth token to use')
+    parser_create.add_argument('--token-name', required=True,
+                              dest='token_name',
+                              help='the auth token_name to use')
     parser_create.add_argument('-f', '--file',
                                action='store_true',
                                help='the output file to write to')
@@ -108,11 +108,11 @@ class GithubAuthUtil(object):
       config_path = self._config_path(args.name)
     template = """
 {{
-  "token": "{token}",
+  "token_name": "{token_name}",
   "repo": "{repo}",
   "owner": "{owner}"
 }}
-    """.format(token=args.token, repo=args.repo, owner=args.owner).strip()
+    """.format(token_name=args.token_name, repo=args.repo, owner=args.owner).strip()
     with open(config_path, 'w') as f:
       f.write(template)
 

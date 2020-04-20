@@ -57,17 +57,18 @@ set -x
 WORKER_INSTALL="$(jq -r .install $CONFIG_FILE)"
 WORKER_NAME="$(jq -r .name $CONFIG_FILE)"
 WORKER_DIR="$(jq -r .work $CONFIG_FILE)"
-REPO_OWNER="$(jq -r .owner $CONFIG_FILE)"
+export GITHUB_OWNERREPO_OWNER="$(jq -r .owner $CONFIG_FILE)"
 REPO_NAME="$(jq -r .repo $CONFIG_FILE)"
-LABELS="$(jq -r -c .labels[] $CONFIG_FILE | tr '\n' ',' | sed 's/,$/\n/')"
-PACKAGE_URL="$(jq -r -c .download_url $CONFIG_FILE)"
-REGISTER_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
-/github-utils/github-auth.py create  --set --repo=$REPO_NAME --owner=$REPO_OWNER --token=$(cat $TOKEN_FILE) -f /tmp/default_auth.json
-REGISTER_TOKEN="$(/github-utils/github-actions-api.py registration-token | jq -r .token)"
 
-if [ "$PACKAGE_URL" == "" ]; then
-  PACKAGE_URL="$(/github-utils/github-actions-api.py downloads | jq -r .download_url)"
-fi
+export GITHUB_REPO=$REPO_NAME
+export GITHUB_OWNER=$REPO_OWNER
+export GITHUB_TOKEN=$(cat $TOKEN_FILE)
+LABELS="$(jq -r -c .labels[] $CONFIG_FILE | tr '\n' ',' | sed 's/,$/\n/')"
+PACKAGE_URL="$(/github-utils/github-actions-api.py org-downloads | jq -r .download_url)"
+REGISTER_URL="https://github.com/$REPO_OWNER"
+
+REGISTER_TOKEN="$(/github-utils/github-actions-api.py org-registration-token | jq -r .token)"
+
 
 cd $WORKER_INSTALL
 sudo ln -s $WORKER_INSTALL /worker-root
