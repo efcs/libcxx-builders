@@ -57,18 +57,24 @@ set -x
 WORKER_INSTALL="$(jq -r .install $CONFIG_FILE)"
 WORKER_NAME="$(jq -r .name $CONFIG_FILE)"
 WORKER_DIR="$(jq -r .work $CONFIG_FILE)"
-export GITHUB_OWNERREPO_OWNER="$(jq -r .owner $CONFIG_FILE)"
+REPO_OWNER="$(jq -r .owner $CONFIG_FILE)"
 REPO_NAME="$(jq -r .repo $CONFIG_FILE)"
 
-export GITHUB_REPO=$REPO_NAME
-export GITHUB_OWNER=$REPO_OWNER
-export GITHUB_TOKEN=$(cat $TOKEN_FILE)
 LABELS="$(jq -r -c .labels[] $CONFIG_FILE | tr '\n' ',' | sed 's/,$/\n/')"
-PACKAGE_URL="$(/github-utils/github-actions-api.py org-downloads | jq -r .download_url)"
-REGISTER_URL="https://github.com/$REPO_OWNER"
 
-REGISTER_TOKEN="$(/github-utils/github-actions-api.py org-registration-token | jq -r .token)"
-
+if [ "$REPO_NAME" == "null" ]; then
+  PACKAGE_URL="$(/github-utils/github-actions-api.py --token=$(cat $TOKEN_FILE) \
+      org-downloads --owner=$REPO_OWNER | jq -r .download_url)"
+  REGISTER_URL="https://github.com/$REPO_OWNER"
+  REGISTER_TOKEN="$(/github-utils/github-actions-api.py --token=$(cat $TOKEN_FILE)
+    --owner=$REPO_OWNER org-registration-token | jq -r .token)"
+else
+  PACKAGE_URL="$(/github-utils/github-actions-api.py --token=$(cat $TOKEN_FILE) \
+      org-downloads --owner=$REPO_OWNER --repo=$REPO_NAME | jq -r .download_url)"
+  REGISTER_URL="https://github.com/$REPO_OWNER/$REPO_NAME"
+  REGISTER_TOKEN="$(/github-utils/github-actions-api.py --token=$(cat $TOKEN_FILE)
+    --owner=$REPO_OWNER --repo=$REPO_NAME registration-token | jq -r .token)"
+fi
 
 cd $WORKER_INSTALL
 sudo ln -s $WORKER_INSTALL /worker-root

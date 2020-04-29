@@ -16,19 +16,17 @@ class GithubActionsUtil(object):
     self.subparsers = self.parser.add_subparsers(help='subcommand help')
     self._create_parser()
     self.args = self.parser.parse_args()
-    auth = api.ManualAuth(repo=self.args.repo, owner=self.args.owner, token=self.args.token)
-    self.api = api.GithubActionsAPI(auth=auth)
+    self.api = api.GithubActionsAPI(self.args.token)
 
   def run_command(self):
-    args = self.args
     try:
-      args.func(args)
+      self.args.func()
     except requests.exceptions.HTTPError as err:
       print(err)
       sys.exit(1)
 
-  def _api_call(self, func, **kwargs):
-    result = func(**kwargs)
+  def _api_call(self, func):
+    result = func(**vars(self.args))
     result.raise_for_status()
     return result
 
@@ -79,19 +77,19 @@ class GithubActionsUtil(object):
                                     help="Read the payload from a file")
 
 
-  def _get_org(self, args):
+  def _get_org(self):
     res = self._api_call(self.api.getOrg)
     self._print_result(res.json())
 
-  def _list_branches_cmd(self, args):
+  def _list_branches_cmd(self):
     res = self._api_call(self.api.listBranches)
     self._print_result(res.json())
 
-  def _list_creds(self, args):
+  def _list_creds(self):
     res = self._api_call(self.api.listCredentials)
     self._print_result(res.json())
 
-  def _push_event_cmd(self, args):
+  def _push_event_cmd(self):
     payload = args.payload
     if args.file:
       with open(payload, 'r') as f:
@@ -104,7 +102,8 @@ class GithubActionsUtil(object):
       print('%r' % res)
       sys.exit(1)
 
-  def _download_commands_base(self, endpoint, args):
+  def _download_commands_base(self, endpoint):
+    args = self.args
     res = self._api_call(endpoint)
     jres = res.json()
     for entry in jres:
@@ -115,39 +114,39 @@ class GithubActionsUtil(object):
     args.os, args.arch))
     sys.exit(1)
 
-  def _downloads_cmd(self, args):
-    return self._download_commands_base(self.api.getActionsDownloads, args)
+  def _downloads_cmd(self):
+    return self._download_commands_base(self.api.getActionsDownloads)
 
 
-  def _org_downloads_cmd(self, args):
-    return self._download_commands_base(self.api.getOrgActionsDownloads, args)
+  def _org_downloads_cmd(self):
+    return self._download_commands_base(self.api.getOrgActionsDownloads)
 
 
-  def _registration_token_cmd(self, args):
+  def _registration_token_cmd(self):
     res = self._api_call(self.api.getCreationToken)
     self._print_result(res.json())
 
-  def _org_registration_token_cmd(self, args):
+  def _org_registration_token_cmd(self):
     res = self._api_call(self.api.getCreationTokenForOrg)
     self._print_result(res.json())
 
-  def _workflows_cmd(self, args):
+  def _workflows_cmd(self):
     res = self._api_call(self.api.getWorkflows)
     self._print_result(res.json())
 
-  def _workflow_cmd(self, args):
-    res = self._api_call(self.api.getWorkflow, workflow_id=args.workflow_id)
+  def _workflow_cmd(self):
+    res = self._api_call(self.api.getWorkflow)
     self._print_result(res.json())
 
-  def _workflow_runs_cmd(self, args):
+  def _workflow_runs_cmd(self):
     res = self._api_call(self.api.getWorkflowRuns)
     self._print_result(res.json())
 
-  def _workflow_run_cmd(self, args):
-    res = self._api_call(self.api.getWorkflowRun, run_id=args.run_id)
+  def _workflow_run_cmd(self):
+    res = self._api_call(self.api.getWorkflowRun)
     self._print_result(res.json())
 
-  def _runners_cmd(self, args):
+  def _runners_cmd(self):
     res = self._api_call(self.api.getRunners)
     self._print_result(res.json())
 
